@@ -35,8 +35,11 @@
             android:value="@string/google_maps_key" />
 
         <activity
+            android:name=".EcuMapActivity"
+            android:label="@string/title_activity_ecu_map"></activity>
+        <activity
             android:name=".PiratePlacesMapActivity"
-            android:label="@string/title_activity_places_map"></activity>
+            android:label="@string/title_activity_places_map" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

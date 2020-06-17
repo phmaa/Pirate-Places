@@ -26,4 +26,5 @@
     <string name="share_place_subject">Just visited a PiratePlace!</string>
     <string name="title_activity_places_map">Map</string>
     <string name="view_places_map">View Places Map</string>
+    <string name="title_activity_ecu_map">Map</string>
 </resources>

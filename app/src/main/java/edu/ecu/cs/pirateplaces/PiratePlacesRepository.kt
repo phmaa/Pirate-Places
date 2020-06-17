@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.Room
 import edu.ecu.cs.pirateplaces.database.PiratePlacesDatabase
+import edu.ecu.cs.pirateplaces.database.migration_1_2
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
@@ -16,7 +17,8 @@ class PiratePlacesRepository private constructor(context: Context) {
         context.applicationContext,
         PiratePlacesDatabase::class.java,
         DATABASE_NAME
-    ).build()
+    ).addMigrations(migration_1_2)
+        .build()
 
     private val piratePlacesDao = database.piratePlacesDao()
 
