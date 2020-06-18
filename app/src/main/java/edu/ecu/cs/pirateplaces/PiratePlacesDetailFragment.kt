@@ -1,9 +1,11 @@
 package edu.ecu.cs.pirateplaces
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -11,13 +13,20 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.GoogleMap
 import java.io.File
+import java.text.NumberFormat
 import java.util.*
 
 private const val ARG_PLACE_ID = "place_id"
@@ -34,13 +43,19 @@ class PiratePlacesDetailFragment:
     private lateinit var place: PiratePlace
     private lateinit var placeNameField : EditText
     private lateinit var guestsField: TextView
+    private lateinit var locationField: TextView
     private lateinit var dateButton: Button
     private lateinit var timeButton: Button
     private lateinit var photoButton: ImageButton
     private lateinit var photoView: ImageView
     private lateinit var reportButton: Button
+    private lateinit var checkInButton: Button
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
+    private lateinit var mapActivity: EcuMapActivity
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val REQUEST_LOCATION_PERMISSION = 1
+
 
     private val piratePlacesDetailViewModel : PiratePlacesDetailViewModel by lazy {
         ViewModelProviders.of(this).get(PiratePlacesDetailViewModel::class.java)
@@ -49,6 +64,19 @@ class PiratePlacesDetailFragment:
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         place = PiratePlace()
+/*
+        fusedLocationClient = activity?.let { LocationServices.getFusedLocationProviderClient(it) }!!
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location?  ->
+                if (location != null) {
+                    place.latitude = location.latitude
+                    place.longitude = location.longitude
+                    place.hasLocation = 1
+                }
+            }
+
+ */
+
     }
 
     override fun onCreateView(
@@ -60,11 +88,13 @@ class PiratePlacesDetailFragment:
 
         placeNameField = view.findViewById(R.id.place_name) as EditText
         guestsField = view.findViewById(R.id.visited_with) as TextView
+        locationField = view.findViewById(R.id.location_visited) as TextView
         dateButton = view.findViewById(R.id.check_in_date) as Button
         timeButton = view.findViewById(R.id.check_in_time) as Button
         photoButton = view.findViewById(R.id.place_camera) as ImageButton
         photoView = view.findViewById(R.id.place_photo) as ImageView
         reportButton = view.findViewById(R.id.share_place) as Button
+        checkInButton = view.findViewById(R.id.check_in) as Button
 
         return view
     }
@@ -89,6 +119,8 @@ class PiratePlacesDetailFragment:
 
         val placeId = arguments?.getSerializable(ARG_PLACE_ID) as UUID
         piratePlacesDetailViewModel.loadPiratePlace(placeId)
+
+
     }
 
     override fun onStart() {
@@ -109,6 +141,11 @@ class PiratePlacesDetailFragment:
         }
 
         placeNameField.addTextChangedListener(placeNameWatcher)
+
+        checkInButton.setOnClickListener {
+            getLastLocation()
+
+        }
 
         dateButton.setOnClickListener {
             DatePickerFragment.newInstance(place.lastVisited).apply {
@@ -236,10 +273,14 @@ class PiratePlacesDetailFragment:
     fun updateUI() {
         val visitedDate = DateFormat.getMediumDateFormat(context).format(place.lastVisited)
         val visitedTime = DateFormat.getTimeFormat(context).format(place.lastVisited)
+        val currentLatitude = Math.abs(place.latitude)
+        val currentLongitude = Math.abs(place.longitude)
 
         placeNameField.setText(place.name)
         guestsField.setHint(R.string.visited_with_hint)
         guestsField.setText(place.visitedWith)
+        locationField.setHint(R.string.location_check_in_hint)
+        locationField.setText(getString(R.string.lat_long_snippet, currentLatitude, currentLongitude))
         dateButton.text = visitedDate
         timeButton.text = visitedTime
 
@@ -267,6 +308,54 @@ class PiratePlacesDetailFragment:
             return getString(R.string.share_message_with_guest, place.name, visitedDate, visitedTime, place.visitedWith)
         }
     }
+
+    private fun getLastLocation() {
+        fusedLocationClient = activity?.let { LocationServices.getFusedLocationProviderClient(it) }!!
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                if (location != null) {
+                    place.latitude = location.latitude
+                    place.longitude = location.longitude
+                    place.hasLocation = 1
+                    updateUI()
+                   Log.i("DetailFragment", "Got latitude: ${place.latitude}, longitude: ${place.longitude}")
+                }
+            }
+    }
+/*
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
+                mapActivity.isMyLo
+            }
+        }
+    }
+
+    private fun isPermissionGranted() : Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun enableMyLocation() {
+        private val map = GoogleMap
+        if (isPermissionGranted()) {
+            mapActivity.isMyLocationEnabled = true
+        }
+        else {
+            ActivityCompat.requestPermissions(
+                mapActivity,
+                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
+            )
+        }
+    }
+
+ */
 
     companion object {
         fun newInstance(id: UUID) : PiratePlacesDetailFragment {

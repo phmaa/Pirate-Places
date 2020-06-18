@@ -11,6 +11,7 @@
     <string name="place_name_label">Place Name</string>
     <string name="place_name_hint">Enter the name of the Pirate Place here</string>
     <string name="visited_with_hint">Click here to select your guest</string>
+    <string name="location_check_in_hint">No Location Checked In</string>
     <string name="place_guests_label">Guest</string>
     <string name="new_pirate_place">New Pirate Place</string>
     <string name="place_details">Details</string>
@@ -27,4 +28,9 @@
     <string name="title_activity_places_map">Map</string>
     <string name="view_places_map">View Places Map</string>
     <string name="title_activity_ecu_map">Map</string>
+    <string name="location_visited">Location Visited</string>
+    <string name="check_in">Check In</string>
+    <string name="lat_long_snippet">%1$.3fN X %2$.3fW</string>
+    <string name="place_name_pin">$s</string>
+    <string name="visited_with_pin">Visted with $s</string>
 </resources>

@@ -87,6 +87,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <TextView
+            style="?android:listSeparatorTextViewStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/location_visited"/>
+
+        <TextView
+            android:id="@+id/location_visited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:textSize="16sp"
+            tools:text="@string/location_check_in_hint" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/check_in_date"
             android:layout_width="0dp"
@@ -108,5 +130,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/share_place_text" />
+
+    <Button
+        android:id="@+id/check_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/check_in" />
 
 </LinearLayout>

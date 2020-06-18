@@ -85,7 +85,7 @@ class PiratePlacesListFragment: Fragment() {
                 true
             }
             R.id.open_places_map -> {
-                val intent = Intent(context, PiratePlacesMapActivity::class.java)
+                val intent = Intent(context, EcuMapActivity::class.java)
                 startActivity(intent)
                 true
             }
