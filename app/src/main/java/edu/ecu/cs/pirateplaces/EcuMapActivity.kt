@@ -1,13 +1,18 @@
 package edu.ecu.cs.pirateplaces
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.Log
+import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -23,7 +28,11 @@ class EcuMapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private val REQUEST_LOCATION_PERMISSION = 1
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private val place = PiratePlace()
+    private lateinit var place: PiratePlace
+
+    private val piratePlacesListViewModel : PiratePlacesListViewModel by lazy {
+        ViewModelProviders.of(this).get(PiratePlacesListViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +41,29 @@ class EcuMapActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
+        place = PiratePlace()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
     }
+
+/*
+    override fun onStart() {
+        super.onStart()
+        piratePlacesDetailViewModel.piratePlaceLiveData.observe(
+            this,
+            Observer { piaratePlace ->
+                piaratePlace?.let {
+                    this.place = piaratePlace
+                    var latitude = place.latitude
+                    var longitude = place.longitude
+                   // place.hasLocation = 1
+                }
+            }
+        )
+        piratePlacesDetailViewModel.savePiratePlace(place)
+    }
+
+ */
 
     /**
      * Manipulates the map once available.
@@ -47,7 +76,23 @@ class EcuMapActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        piratePlacesListViewModel.piratePlacesListLiveData.observe(
+            this,
+            Observer {places ->
+                places?.let {
+                    //val id = place.id
+                    val latitude = place.latitude
+                    val longitude = place.longitude
+                    val latLng = LatLng(latitude, longitude)
+                    Log.i("MapActivity", "Got latitude: ${place.latitude}, longitude: ${place.longitude}")
+                    if (place.hasLocation == 1) {
+                        map.addMarker(MarkerOptions().position(latLng))
+                    }
+                }
 
+            }
+        )
+/*
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location : Location? ->
                 if (location != null) {
@@ -58,16 +103,26 @@ class EcuMapActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
 
+        piratePlacesDetailViewModel.piratePlaceLiveData.observe(
+            this,
+            Observer {place ->
+                place?.let {
+                    this.place = place
+                    if (place.hasLocation == 1) {
+                        val latLng = LatLng(place.latitude, place.longitude)
+                        map.addMarker(MarkerOptions().position(latLng))
+                        Log.i("MapActivity2", "Got latitude: ${place.latitude}, longitude: ${place.longitude}")
+                    }
 
-/*
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
+                }
+            }
+        )
+        //piratePlacesDetailViewModel.savePiratePlace(place)
 
  */
-
         enableMyLocation()
+        setMapLongClik(map)
     }
 
     override fun onRequestPermissionsResult(
@@ -99,5 +154,14 @@ class EcuMapActivity : AppCompatActivity(), OnMapReadyCallback {
                 REQUEST_LOCATION_PERMISSION
             )
         }
+    }
+
+    private fun setMapLongClik(map: GoogleMap) {
+       map.setOnMapLongClickListener { latLng ->
+           map.addMarker(
+               MarkerOptions()
+                   .position(latLng)
+           )
+       }
     }
 }

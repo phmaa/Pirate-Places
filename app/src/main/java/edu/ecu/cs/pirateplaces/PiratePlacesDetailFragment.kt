@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.provider.MediaStore
@@ -16,6 +17,7 @@ import android.text.format.DateFormat
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -52,7 +54,6 @@ class PiratePlacesDetailFragment:
     private lateinit var checkInButton: Button
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
-    private lateinit var mapActivity: EcuMapActivity
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val REQUEST_LOCATION_PERMISSION = 1
 
@@ -64,18 +65,6 @@ class PiratePlacesDetailFragment:
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         place = PiratePlace()
-/*
-        fusedLocationClient = activity?.let { LocationServices.getFusedLocationProviderClient(it) }!!
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location?  ->
-                if (location != null) {
-                    place.latitude = location.latitude
-                    place.longitude = location.longitude
-                    place.hasLocation = 1
-                }
-            }
-
- */
 
     }
 
@@ -322,18 +311,6 @@ class PiratePlacesDetailFragment:
                 }
             }
     }
-/*
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
-                mapActivity.isMyLo
-            }
-        }
-    }
 
     private fun isPermissionGranted() : Boolean {
         return ContextCompat.checkSelfPermission(
@@ -341,21 +318,24 @@ class PiratePlacesDetailFragment:
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun enableMyLocation() {
-        private val map = GoogleMap
-        if (isPermissionGranted()) {
-            mapActivity.isMyLocationEnabled = true
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (isPermissionGranted()) {
+                getLastLocation()
+            } else {
+                activity?.requestPermissions(
+                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_LOCATION_PERMISSION
+                )
+            }
         }
-        else {
-            ActivityCompat.requestPermissions(
-                mapActivity,
-                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
-        }
-    }
 
- */
+    }
 
     companion object {
         fun newInstance(id: UUID) : PiratePlacesDetailFragment {
