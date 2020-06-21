@@ -33,5 +33,4 @@
     <string name="place_name_pin">$s</string>
     <string name="visited_with_pin">Visted with $s</string>
     <string name="location_text_view">%1$.3fN X %2$.3fW</string>
-    <string name="lat_long_snippet">%1$.3fN X %2$.3fW</string>
 </resources>

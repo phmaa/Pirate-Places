@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.GoogleMap
+import kotlinx.android.synthetic.main.activity_ecu_map.*
 import java.io.File
 import java.text.NumberFormat
 import java.util.*
@@ -56,7 +57,6 @@ class PiratePlacesDetailFragment:
     private lateinit var photoUri: Uri
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val REQUEST_LOCATION_PERMISSION = 1
-
 
     private val piratePlacesDetailViewModel : PiratePlacesDetailViewModel by lazy {
         ViewModelProviders.of(this).get(PiratePlacesDetailViewModel::class.java)
@@ -102,12 +102,14 @@ class PiratePlacesDetailFragment:
                         "edu.ecu.cs.pirateplaces.fileprovider",
                         photoFile)
                     updateUI()
+
                 }
             }
         )
 
         val placeId = arguments?.getSerializable(ARG_PLACE_ID) as UUID
         piratePlacesDetailViewModel.loadPiratePlace(placeId)
+
 
 
     }
@@ -131,10 +133,37 @@ class PiratePlacesDetailFragment:
 
         placeNameField.addTextChangedListener(placeNameWatcher)
 
+        checkInButton.apply {
+            setOnClickListener {
+                if (isPermissionGranted()) {
+                    getLastLocation()
+                }
+                else {
+                    ActivityCompat.requestPermissions(
+                        requireActivity(),
+                        arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                        REQUEST_LOCATION_PERMISSION
+                    )
+                }
+            }
+        }
+/*
         checkInButton.setOnClickListener {
-            getLastLocation()
+            if (isPermissionGranted()) {
+                hasPermission = true
+                getLastLocation()
+            }
+            else {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_LOCATION_PERMISSION
+                )
+            }
 
         }
+
+ */
 
         dateButton.setOnClickListener {
             DatePickerFragment.newInstance(place.lastVisited).apply {
@@ -269,7 +298,13 @@ class PiratePlacesDetailFragment:
         guestsField.setHint(R.string.visited_with_hint)
         guestsField.setText(place.visitedWith)
         locationField.setHint(R.string.location_check_in_hint)
-        locationField.setText(getString(R.string.lat_long_snippet, currentLatitude, currentLongitude))
+
+        if (currentLatitude == 0.0 && currentLongitude == 0.0) {
+                locationField.setText(getString(R.string.location_check_in_hint))
+            } else {
+            locationField.setText(getString(R.string.location_text_view, currentLatitude, currentLongitude))
+            }
+
         dateButton.text = visitedDate
         timeButton.text = visitedTime
 
@@ -307,7 +342,6 @@ class PiratePlacesDetailFragment:
                     place.longitude = location.longitude
                     place.hasLocation = 1
                     updateUI()
-                   Log.i("DetailFragment", "Got latitude: ${place.latitude}, longitude: ${place.longitude}")
                 }
             }
     }
@@ -318,23 +352,16 @@ class PiratePlacesDetailFragment:
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<String>,
         grantResults: IntArray
     ) {
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (isPermissionGranted()) {
+            if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
                 getLastLocation()
-            } else {
-                activity?.requestPermissions(
-                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_LOCATION_PERMISSION
-                )
             }
         }
-
     }
 
     companion object {
