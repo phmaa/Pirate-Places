@@ -30,7 +30,5 @@
     <string name="title_activity_ecu_map">Map</string>
     <string name="location_visited">Location Visited</string>
     <string name="check_in">Check In</string>
-    <string name="place_name_pin">$s</string>
-    <string name="visited_with_pin">Visted with $s</string>
     <string name="location_text_view">%1$.3fN X %2$.3fW</string>
 </resources>
